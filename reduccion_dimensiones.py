@@ -587,7 +587,7 @@ print(f"Las imágenes fueron guardadas en: {os.path.abspath(output_path)}")
 saved_files = os.listdir(output_path)
 print(f"Número de archivos en el directorio: {len(saved_files)}")
 
-"""Reconstruccion de fold 0"""
+"""Reconstruccion de fold 0 all"""
 
 # Reconstrucción de fold_0_all
 # Selecciona solo 500 imágenes
@@ -642,7 +642,7 @@ plt.show()
 """Guardar Imagenes"""
 
 # Guardar las imágenes reconstruidas
-output_path = "data_reconstruida/training_data/fold_0/"
+output_path = "data_reconstruida/training_data/fold_0/all/"
 if not os.path.exists(output_path):
     os.makedirs(output_path)
 
@@ -667,8 +667,87 @@ print(f"Total de imágenes guardadas: {saved_count}")
 print(f"Ruta: {os.path.abspath(output_path)}")
 
 
+""" Reconstrcuccion de fold 0 hem  """
 
-"""Reconstruccion de training fold 1"""
+
+# Reconstrucción de fold_0_hem
+# Selecciona solo 500 imágenes
+sample_size = 500
+fold_0_hem_sample = training_data_fold_0_hem[:sample_size]
+
+# 1. Convertir la lista de imágenes a un arreglo numpy
+fold_0_hem_np = np.array(fold_0_hem_sample)
+n_imgs, h, w, c = fold_0_hem_np.shape
+
+# 2. Convertir a escala de grises
+if c == 3:
+    fold_0_hem_gray = np.array([cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) for img in fold_0_hem_np])
+else:
+    fold_0_hem_gray = fold_0_hem_np.squeeze()
+
+# 3. Aplanar cada imagen
+X = fold_0_hem_gray.reshape(n_imgs, -1)
+
+# 4. Centrar los datos
+X_bar = X.mean(axis=0)
+X_centered = X - X_bar
+
+# 5. PCA usando SVD
+U, S, Vt = np.linalg.svd(X_centered, full_matrices=False)
+
+# 6. Seleccionar componentes principales
+q = 50  # Mismo número que usamos antes
+E = Vt[:q].T
+
+# 7. Proyectar y reconstruir
+Y = X_centered @ E
+X_hat = (Y @ E.T) + X_bar
+
+# 8. Volver a la forma original
+fold_0_hem_reconstruida = X_hat.reshape(n_imgs, h, w)
+
+# Visualización
+plt.figure(figsize=(12, 6))
+for i in range(min(6, n_imgs)):
+    plt.subplot(2, 6, i+1)
+    plt.imshow(fold_0_hem_gray[i], cmap='gray')
+    plt.title("Original")
+    plt.axis('off')
+    plt.subplot(2, 6, i+7)
+    plt.imshow(fold_0_hem_reconstruida[i], cmap='gray')
+    plt.title("Reconstruida")
+    plt.axis('off')
+plt.tight_layout()
+plt.show()
+
+"""Guardar Imagenes"""
+
+# Guardar las imágenes reconstruidas
+output_path = "data_reconstruida/training_data/fold_0/hem/"
+if not os.path.exists(output_path):
+    os.makedirs(output_path)
+
+# Convertir a uint8 para guardar
+fold_0_hem_reconstructed_uint8 = np.clip(fold_0_hem_reconstruida, 0, 255).astype(np.uint8)
+
+# Guardar cada imagen
+saved_count = 0
+for i in range(len(fold_0_hem_reconstructed_uint8)):
+    filename = f"testing_fold_0_{i+1}.bmp"
+    filepath = os.path.join(output_path, filename)
+    success = cv2.imwrite(filepath, fold_0_hem_reconstructed_uint8[i])
+    if success:
+        saved_count += 1
+        if i % 50 == 0:
+            print(f"Guardada imagen {i+1}/{len(fold_0_hem_reconstructed_uint8)}")
+    else:
+        print(f"Error al guardar imagen {i+1}")
+
+print(f"\nProceso completado!")
+print(f"Total de imágenes guardadas: {saved_count}")
+print(f"Ruta: {os.path.abspath(output_path)}")
+
+"""Reconstruccion de training fold 1 all"""
 
 # Reconstrucción de fold_1_all
 # Selecciona solo 500 imágenes
@@ -721,7 +800,7 @@ plt.tight_layout()
 plt.show()
 
 # Guardar las imágenes reconstruidas de fold_1_all
-output_path = "data_reconstruida/training_data/fold_1/"
+output_path = "data_reconstruida/training_data/fold_1/all/"
 if not os.path.exists(output_path):
     os.makedirs(output_path)
 
@@ -745,9 +824,89 @@ print(f"\nProceso completado!")
 print(f"Total de imágenes guardadas: {saved_count}")
 print(f"Ruta: {os.path.abspath(output_path)}")
 
+""" Reconstruccion de training fold 1 hem """
+
+"""Reconstruccion de fold 1 hem"""
+
+# Reconstrucción de fold_1_hem
+# Selecciona solo 500 imágenes
+sample_size = 500
+fold_1_hem_sample = training_data_fold_1_hem[:sample_size]
+
+# 1. Convertir la lista de imágenes a un arreglo numpy
+fold_1_hem_np = np.array(fold_1_hem_sample)
+n_imgs, h, w, c = fold_1_hem_np.shape
+
+# 2. Convertir a escala de grises
+if c == 3:
+    fold_1_hem_gray = np.array([cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) for img in fold_1_hem_np])
+else:
+    fold_1_hem_gray = fold_1_hem_np.squeeze()
+
+# 3. Aplanar cada imagen
+X = fold_1_hem_gray.reshape(n_imgs, -1)
+
+# 4. Centrar los datos
+X_bar = X.mean(axis=0)
+X_centered = X - X_bar
+
+# 5. PCA usando SVD
+U, S, Vt = np.linalg.svd(X_centered, full_matrices=False)
+
+# 6. Seleccionar componentes principales
+q = 50  # Mismo número que usamos antes
+E = Vt[:q].T
+
+# 7. Proyectar y reconstruir
+Y = X_centered @ E
+X_hat = (Y @ E.T) + X_bar
+
+# 8. Volver a la forma original
+fold_1_hem_reconstruida = X_hat.reshape(n_imgs, h, w)
+
+# Visualización
+plt.figure(figsize=(12, 6))
+for i in range(min(6, n_imgs)):
+    plt.subplot(2, 6, i+1)
+    plt.imshow(fold_1_hem_gray[i], cmap='gray')
+    plt.title("Original")
+    plt.axis('off')
+    plt.subplot(2, 6, i+7)
+    plt.imshow(fold_1_hem_reconstruida[i], cmap='gray')
+    plt.title("Reconstruida")
+    plt.axis('off')
+plt.tight_layout()
+plt.show()
+
+"""Guardar Imagenes"""
+
+# Guardar las imágenes reconstruidas
+output_path = "data_reconstruida/training_data/fold_1/hem/"
+if not os.path.exists(output_path):
+    os.makedirs(output_path)
+
+# Convertir a uint8 para guardar
+fold_1_hem_reconstructed_uint8 = np.clip(fold_1_hem_reconstruida, 0, 255).astype(np.uint8)
+
+# Guardar cada imagen
+saved_count = 0
+for i in range(len(fold_1_hem_reconstructed_uint8)):
+    filename = f"testing_fold_1_{i+1}.bmp"
+    filepath = os.path.join(output_path, filename)
+    success = cv2.imwrite(filepath, fold_1_hem_reconstructed_uint8[i])
+    if success:
+        saved_count += 1
+        if i % 50 == 0:
+            print(f"Guardada imagen {i+1}/{len(fold_1_hem_reconstructed_uint8)}")
+    else:
+        print(f"Error al guardar imagen {i+1}")
+
+print(f"\nProceso completado!")
+print(f"Total de imágenes guardadas: {saved_count}")
+print(f"Ruta: {os.path.abspath(output_path)}")
 
 
-"""reconstruccion de Training fold 2"""
+"""reconstruccion de Training fold 2 all"""
 
 # Reconstrucción de fold_2_all
 # Selecciona solo 500 imágenes
@@ -800,7 +959,7 @@ plt.tight_layout()
 plt.show()
 
 # Guardar las imágenes reconstruidas de fold_2_all
-output_path = "data_reconstruida/training_data/fold_2/"
+output_path = "data_reconstruida/training_data/fold_2/all/"
 if not os.path.exists(output_path):
     os.makedirs(output_path)
 
@@ -817,6 +976,87 @@ for i in range(len(fold_2_all_reconstructed_uint8)):
         saved_count += 1
         if i % 50 == 0:
             print(f"Guardada imagen {i+1}/{len(fold_2_all_reconstructed_uint8)}")
+    else:
+        print(f"Error al guardar imagen {i+1}")
+
+print(f"\nProceso completado!")
+print(f"Total de imágenes guardadas: {saved_count}")
+print(f"Ruta: {os.path.abspath(output_path)}")
+
+"""Reconstruccion de training fold 2 hem"""
+
+"""Reconstruccion de fold 2 hem"""
+
+# Reconstrucción de fold_2_hem
+# Selecciona solo 500 imágenes
+sample_size = 500
+fold_2_hem_sample = training_data_fold_2_hem[:sample_size]
+
+# 1. Convertir la lista de imágenes a un arreglo numpy
+fold_2_hem_np = np.array(fold_2_hem_sample)
+n_imgs, h, w, c = fold_2_hem_np.shape
+
+# 2. Convertir a escala de grises
+if c == 3:
+    fold_2_hem_gray = np.array([cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) for img in fold_2_hem_np])
+else:
+    fold_2_hem_gray = fold_2_hem_np.squeeze()
+
+# 3. Aplanar cada imagen
+X = fold_2_hem_gray.reshape(n_imgs, -1)
+
+# 4. Centrar los datos
+X_bar = X.mean(axis=0)
+X_centered = X - X_bar
+
+# 5. PCA usando SVD
+U, S, Vt = np.linalg.svd(X_centered, full_matrices=False)
+
+# 6. Seleccionar componentes principales
+q = 50  # Mismo número que usamos antes
+E = Vt[:q].T
+
+# 7. Proyectar y reconstruir
+Y = X_centered @ E
+X_hat = (Y @ E.T) + X_bar
+
+# 8. Volver a la forma original
+fold_2_hem_reconstruida = X_hat.reshape(n_imgs, h, w)
+
+# Visualización
+plt.figure(figsize=(12, 6))
+for i in range(min(6, n_imgs)):
+    plt.subplot(2, 6, i+1)
+    plt.imshow(fold_2_hem_gray[i], cmap='gray')
+    plt.title("Original")
+    plt.axis('off')
+    plt.subplot(2, 6, i+7)
+    plt.imshow(fold_2_hem_reconstruida[i], cmap='gray')
+    plt.title("Reconstruida")
+    plt.axis('off')
+plt.tight_layout()
+plt.show()
+
+"""Guardar Imagenes"""
+
+# Guardar las imágenes reconstruidas
+output_path = "data_reconstruida/training_data/fold_2/hem/"
+if not os.path.exists(output_path):
+    os.makedirs(output_path)
+
+# Convertir a uint8 para guardar
+fold_2_hem_reconstructed_uint8 = np.clip(fold_2_hem_reconstruida, 0, 255).astype(np.uint8)
+
+# Guardar cada imagen
+saved_count = 0
+for i in range(len(fold_2_hem_reconstructed_uint8)):
+    filename = f"testing_fold_2_{i+1}.bmp"
+    filepath = os.path.join(output_path, filename)
+    success = cv2.imwrite(filepath, fold_2_hem_reconstructed_uint8[i])
+    if success:
+        saved_count += 1
+        if i % 50 == 0:
+            print(f"Guardada imagen {i+1}/{len(fold_2_hem_reconstructed_uint8)}")
     else:
         print(f"Error al guardar imagen {i+1}")
 
